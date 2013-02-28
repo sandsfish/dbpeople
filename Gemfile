@@ -39,3 +39,4 @@ gem 'jquery-rails'
 # gem 'ruby-debug'
 
 gem 'thin'
+gem 'pg', :group => :production
