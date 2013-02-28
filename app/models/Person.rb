@@ -15,6 +15,7 @@ class Person
 
 	end
 
+	# TODO:   Move this into its own helper or gem (is there a dbpedia gem?)
 	# FIXME:  Rescue & handle "Request Timeout" situation
 	def self.queryEndpoint(endpoint, query, format = "xml")
 		# output options: "xml" (default), "json", "js", "n3", "csv"
