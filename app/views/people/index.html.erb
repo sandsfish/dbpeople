@@ -1,6 +1,6 @@
 <h1>people index</h1>
 <ul>
 	<% @influenced.each do |i| %>
-	<li><%= i %></li>
+	<li><%= link_to i, i %></li>
 	<% end %>
 </ul>

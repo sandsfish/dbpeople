@@ -40,3 +40,7 @@ gem 'jquery-rails'
 # gem 'ruby-debug'
 
 gem 'thin'
+gem 'rest-client'
+gem 'linkeddata'
+gem 'nokogiri'
+#gem 'open-uri'
