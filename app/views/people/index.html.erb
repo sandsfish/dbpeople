@@ -1,14 +1,20 @@
-<h1>people index</h1>
+<h1>influence discovery</h1>
 
 <%= form_tag '/people', :method => :get do %>
-	<%= text_field_tag 'person_uri' %>
-	<%= submit_tag 'Get People Influenced' %>
+	<%= label_tag 'person_uri', 'Person URI' %>
+	<%= text_field_tag 'person_uri', nil, :size => 50 %>
+	<%= submit_tag 'Get People They Influenced' %>
 <% end %>
+<i>e.g. "http://dbpedia.org/resource/Heraclitus"</i>
 
 <hr/>
 
-<ul>
+<% if !params[:person_uri].nil? %>
+	<h2><%= link_to params[:person_uri], params[:person_uri] %> influenced:</h2>
+
+	<ul>
 	<% @influenced.each do |i| %>
 		<li><%= link_to i, i %></li>
 	<% end %>
-</ul>
+	</ul>
+<% end %>
