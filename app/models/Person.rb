@@ -4,7 +4,8 @@ class Person
 	endpoint = 'http://dbpedia.org/sparql'
 
 	def self.getInfluenced(personURI, depth=1)
-		query = "SELECT * WHERE { <#{personURI}> a <http://dbpedia.org/ontology/Person> . <#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced . }"
+		# Note: this query excludes other values in DBPedia that define influenced groups by subsetting to the dbpedia:Person class.
+		query = "SELECT * WHERE { <#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced . ?influenced a <http://dbpedia.org/ontology/Person> . }"
 		peopleInfluenced = queryEndpoint('http://dbpedia.org/sparql', query, "csv")
 		
 		# Parse CSV into components, remove empty elements due to splitting on quotes (fix this) and 
