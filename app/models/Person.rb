@@ -15,7 +15,8 @@ class Person
 
 	def self.getInfluencersOf(personURI, depth=1)
 		query = "SELECT * WHERE { ?influencer <http://dbpedia.org/ontology/influenced> <#{personURI}> . ?influencer a <http://dbpedia.org/ontology/Person> . }"
-		peopleInfluenced = queryEndpoint('http://dbpedia.org/sparql', query, "csv")
+		influencers = queryEndpoint('http://dbpedia.org/sparql', query, "csv")
+		influencers.split("\"").delete_if { |v| v.strip.empty? }[1,influencers.length]
 	end
 
 	# TODO:   Move this into its own helper or gem (is there a dbpedia gem?)
