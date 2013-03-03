@@ -3,16 +3,18 @@ include RDF
 class Person
 	endpoint = 'http://dbpedia.org/sparql'
 
-	def self.getInfluenced(personURI)
-		#['sands fish']
-		query = "SELECT * WHERE { <#{personURI}> a <http://dbpedia.org/ontology/Person> . <#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced. }"
+	def self.getInfluenced(personURI, depth=1)
+		query = "SELECT * WHERE { <#{personURI}> a <http://dbpedia.org/ontology/Person> . <#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced . }"
 		peopleInfluenced = queryEndpoint('http://dbpedia.org/sparql', query, "csv")
-		# ActiveRecord::Base.logger.info peopleInfluenced
 		
 		# Parse CSV into components, remove empty elements due to splitting on quotes (fix this) and 
 		# removing the first element, because it is the column name.
 		peopleInfluenced.split("\"").delete_if { |v| v.strip.empty? }[1,peopleInfluenced.length]
+	end
 
+	def self.getInfluencersOf(personURI, depth=1)
+		query = "SELECT * WHERE { ?influencer <http://dbpedia.org/ontology/influenced> <#{personURI}> . ?influencer a <http://dbpedia.org/ontology/Person> . }"
+		peopleInfluenced = queryEndpoint('http://dbpedia.org/sparql', query, "csv")
 	end
 
 	# TODO:   Move this into its own helper or gem (is there a dbpedia gem?)
