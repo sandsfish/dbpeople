@@ -8,8 +8,21 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-
-<%= yield %>
-
+	<div id="header">
+		<h1 style="margin-bottom: 1px; margin-top: 15px;">influence discovery</h1>
+		powered by <a href="http://dbpedia.org" style="color: #00CCFF; text-decoration: none;">dbpedia.org</a>
+		<span style="float: right; padding-right: 35px;">a research tool by <a href="http://sandsfish.com" style="color: #00CCFF; text-decoration: none;">sands fish</a></span>
+	</div>
+	<div id="main">
+		<%= yield %>
+	</div>
+	<br/>
+	<div id="footer">
+		<br/>
+		<br/>
+		powered by <a href="http://dbpedia.org" style="color: #00CCFF; text-decoration: none;">dbpedia.org</a>
+		<span style="float: right; padding-right: 35px;">a research tool by <a href="http://sandsfish.com" style="color: #00CCFF; text-decoration: none;">sands fish</a></span>
+		<br/>
+	</div>
 </body>
 </html>

@@ -12,5 +12,93 @@
  *= require_tree .
 */
 
-h1, h2, h3 {font-family: 'Strait', sans-serif;}
-body { font-family: 'Exo', sans-serif; }
+html, body{
+  margin: 0;
+  padding: 0;
+}
+
+body { 
+	font-family: 'Exo', sans-serif;
+	color: #444444;
+	margin: 0px; 
+	padding-top: 0px; 
+	margin-top: 0px; 
+	border-spacing: 0px; 
+	background-color: #DDDDDD;
+}
+
+h1, h2, h3 {
+	font-family: 'Strait', sans-serif;
+}
+
+a { 
+	color: #304FBF;
+	text-decoration: none;
+}
+
+div#header {
+	width: 100%; 
+	background-color: #444444; 
+	color: #FFFFFF; 
+	padding-left: 20px; 
+	padding-top: 0.1px; 
+	padding-bottom: 8px; 
+	padding-right: 40px;
+}
+
+div#footer {
+	width: 100%; 
+	background-color: #444444; 
+	color: #FFFFFF; 
+	padding-left: 20px; 
+	padding-top: 0.1px; 
+	padding-bottom: 8px; 
+	padding-right: 40px;
+}
+
+div#main {
+	
+}
+
+div#searchbar {
+	margin: 20px;
+}
+
+div#results-container {
+	width: 100%;
+	margin: 0px;
+	background-color: #EEEEEE;
+	padding-top: 10px;
+}
+
+div#results {
+	margin: 20px;
+}
+
+.example_text {
+	font-style: italic;
+	font-size: 12px;
+}
+
+input {
+	background-color: white;
+	font-family: 'Exo', sans-serif;
+	font-size: 15px;
+	padding: 15px;
+	margin: 0;
+	border: 0;
+}
+
+input.button {
+	font-family: 'Exo', sans-serif;
+	background-color: #00CCFF;
+	border: 0;
+	color: #FFFFFF;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-left: 10px;
+}
+
+

@@ -1,30 +1,35 @@
-<h1>influence discovery</h1>
+<div id="searchbar">
 
-<%= form_tag '/people', :method => :get do %>
-	<%= label_tag 'person_uri', 'Person URI' %>
+  <%= form_tag '/people', :method => :get do %>
 	<%= text_field_tag 'person_uri', nil, :size => 75, :value => params[:person_uri] %>
-	<%= submit_tag 'Get People They Influenced' %>
-<% end %>
-<i>e.g. "http://dbpedia.org/resource/Heraclitus"</i>
+	<%= submit_tag 'Analyze Influence', :class => 'button' %>
+  <% end %>
+  <% if params[:person_uri].nil? || params[:person_uri].empty? %>
+	<span class="example_text">e.g. <a href="/people?person_uri=http%3A%2F%2Fdbpedia.org%2Fresource%2FNoam_Chomsky">http://dbpedia.org/resource/Noam_Chomsky</a></span>
+  <% end %>
+</div>
 
-<hr/>
+<div id="results-container">
+  <div id="results">
+    <% if !@influenced.empty? || !@influencers.empty? %>
 
-<% if !params[:person_uri].nil? %>
-	<h2><%= link_to params[:person_uri], params[:person_uri] %> influenced:</h2>
+	  <h2><%= link_to params[:person_uri], '/people?person_uri=' + u(params[:person_uri]) %> influenced:</h2>
 
-	<ul>
-	<% @influenced.each do |i| %>
-		<li><%= link_to i, i %></li>
-	<% end %>
-	</ul>
+	  <% @influenced.each do |i| %>
+		&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 75%">&#9658;</span>&nbsp;&nbsp;<%= link_to i, '/people?person_uri=' + u(i) %><br/>
+	  <% end %>
 
-	<br/>
+	  <br/>
 
-	<h2><%= link_to params[:person_uri], params[:person_uri] %> was influenced by:</h2>
+	  <h2><%= link_to params[:person_uri], '/people?person_uri=' + u(params[:person_uri]) %> was influenced by:</h2>
 
-	<ul>
-	<% @influencers.each do |i| %>
-		<li><%= link_to i, i %></li>
-	<% end %>
-	</ul>
-<% end %>
+	  <% @influencers.each do |i| %>
+		&nbsp;&nbsp;&nbsp;&nbsp;&#9668;&nbsp;&nbsp;<%= link_to i, '/people?person_uri=' + u(i) %><br/>
+	  <% end %>
+    <% end %>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+  </div>
+</div>
