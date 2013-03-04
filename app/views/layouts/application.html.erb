@@ -2,16 +2,16 @@
 <html>
 <head>
   <link href='http://fonts.googleapis.com/css?family=Exo:100|Strait' rel='stylesheet' type='text/css'>
-  <title>DBPeople</title>
+  <title>influence discovery, by sands fish</title>
   <%= stylesheet_link_tag    "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
 </head>
 <body>
 	<div id="header">
-		<h1 style="margin-bottom: 1px; margin-top: 15px;">influence discovery</h1>
-		powered by <a href="http://dbpedia.org" style="color: #00CCFF; text-decoration: none;">dbpedia.org</a>
-		<span style="float: right; padding-right: 35px;">a research tool by <a href="http://sandsfish.com" style="color: #00CCFF; text-decoration: none;">sands fish</a></span>
+		<h1 class="logo"><a href="/" class="logo">influence discovery</a></h1>
+		powered by <a href="http://dbpedia.org" class="subtitle">dbpedia.org</a>
+		<span class="subtitle">a research tool by <a href="http://sandsfish.com" class="subtitle">sands fish</a></span>
 	</div>
 	<div id="main">
 		<%= yield %>
@@ -20,8 +20,8 @@
 	<div id="footer">
 		<br/>
 		<br/>
-		powered by <a href="http://dbpedia.org" style="color: #00CCFF; text-decoration: none;">dbpedia.org</a>
-		<span style="float: right; padding-right: 35px;">a research tool by <a href="http://sandsfish.com" style="color: #00CCFF; text-decoration: none;">sands fish</a></span>
+		powered by <a href="http://dbpedia.org" class="subtitle">dbpedia.org</a>
+		<span class="subtitle">a research tool by <a href="http://sandsfish.com" class="subtitle">sands fish</a></span>
 		<br/>
 	</div>
 </body>

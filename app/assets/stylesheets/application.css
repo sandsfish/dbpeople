@@ -36,6 +36,26 @@ a {
 	text-decoration: none;
 }
 
+a.logo {
+	text-decoration: none; 
+	color: white;
+}
+
+h1.logo {
+	margin-bottom: 1px; 
+	margin-top: 15px;
+}
+
+a.subtitle {
+	color: #00CCFF; 
+	text-decoration: none;
+}
+
+span.subtitle {
+	float: right; 
+	padding-right: 35px;
+}
+
 div#header {
 	width: 100%; 
 	background-color: #444444; 
