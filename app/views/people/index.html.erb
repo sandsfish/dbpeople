@@ -13,7 +13,7 @@
   <div id="results">
     <% unless @influenced.nil? || @influencers.nil? %>
 
-	  <h2><%= link_to params[:person_uri], '/people?person_uri=' + u(params[:person_uri]) %> influenced:</h2>
+	  <h2><%= link_to params[:person_uri], '/people?person_uri=' + u(params[:person_uri]) %> influenced <%= @forward_count %> people:</h2>
 
 	  <% @influenced.each do |i| %>
 		&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: 75%">&#9658;</span>&nbsp;&nbsp;<%= link_to i, '/people?person_uri=' + u(i) %><br/>
@@ -21,15 +21,30 @@
 
 	  <br/>
 
-	  <h2><%= link_to params[:person_uri], '/people?person_uri=' + u(params[:person_uri]) %> was influenced by:</h2>
+	  <h2><%= link_to params[:person_uri], '/people?person_uri=' + u(params[:person_uri]) %> was influenced by <%= @backward_count %> people:</h2>
 
 	  <% @influencers.each do |i| %>
 		&nbsp;&nbsp;&nbsp;&nbsp;&#9668;&nbsp;&nbsp;<%= link_to i, '/people?person_uri=' + u(i) %><br/>
 	  <% end %>
+
+	  <br/>
+      <br/>
+      <br/>
+      <br/>
+    <% else %>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
     <% end %>
-    <br/>
-    <br/>
-    <br/>
-    <br/>
   </div>
 </div>
