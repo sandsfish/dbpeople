@@ -1,5 +1,7 @@
 DBPeople::Application.routes.draw do
 
+  resources :stats
+
   resources :people
 
   # The priority is based upon order of creation:

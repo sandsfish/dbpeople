@@ -1,0 +1,12 @@
+<% title "Stats" %>
+
+<p>
+  <strong>Hitcount:</strong>
+  <%= @stats.hitcount %>
+</p>
+
+<p>
+  <%= link_to "Edit", edit_stats_path(@stats) %> |
+  <%= link_to "Destroy", @stats, :confirm => 'Are you sure?', :method => :delete %> |
+  <%= link_to "View All", stats_path %>
+</p>

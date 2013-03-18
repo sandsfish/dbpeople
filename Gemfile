@@ -44,3 +44,6 @@ gem 'rest-client'
 gem 'linkeddata'
 gem 'nokogiri'
 #gem 'open-uri'
+gem 'nifty-generators'
+
+gem "mocha", :group => :test
