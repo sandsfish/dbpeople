@@ -11,7 +11,7 @@
 
 <div id="results-container">
   <div id="results">
-    <% if !@influenced.empty? || !@influencers.empty? %>
+    <% unless @influenced.nil? || @influencers.nil? %>
 
 	  <h2><%= link_to params[:person_uri], '/people?person_uri=' + u(params[:person_uri]) %> influenced:</h2>
 
