@@ -4,9 +4,3 @@
   <strong>Hitcount:</strong>
   <%= @stats.hitcount %>
 </p>
-
-<p>
-  <%= link_to "Edit", edit_stat_path(@stats) %> |
-  <%= link_to "Destroy", @stats, :confirm => 'Are you sure?', :method => :delete %> |
-  <%= link_to "View All", stat_path %>
-</p>

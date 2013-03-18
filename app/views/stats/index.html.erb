@@ -1,17 +1,11 @@
-<% title "Stats" %>
-
+&nbsp;&nbsp;&nbsp;&nbsp;<% title "Stats" %>
 <table>
   <tr>
-    <th>Hitcount</th>
+    <th>&nbsp;&nbsp;&nbsp;Hitcount</th>
   </tr>
   <% for stats in @stats %>
     <tr>
-      <td><%= stats.hitcount %></td>
-      <td><%= link_to "Show", stats %></td>
-      <td><%= link_to "Edit", edit_stat_path(stats) %></td>
-      <td><%= link_to "Destroy", stats, :confirm => 'Are you sure?', :method => :delete %></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= stats.hitcount %></td>
     </tr>
   <% end %>
 </table>
-
-<p><%= link_to "New Stats", new_stat_path %></p>
