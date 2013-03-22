@@ -122,3 +122,7 @@ input.button {
 }
 
 
+div#flash {
+	color: blue;
+	margin: 20px;
+}

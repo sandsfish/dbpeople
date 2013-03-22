@@ -11,14 +11,22 @@ class PeopleController < ApplicationController
 		end
 
 		unless params[:person_uri].nil?
-			@influenced = Person.getInfluenced(params[:person_uri])
-			@influencers = Person.getInfluencersOf(params[:person_uri])
-			
-			# FIXME: Do this in the model and return a hash with influenced, 
-			# influencers, and counts.  Better yet, do this all as a JSON
-			# web-service / AJAX call.
-			@forward_count = @influenced.count
-			@backward_count = @influencers.count
+			if params[:person_uri].starts_with? 'http://dbpedia.org'
+				begin
+					@influenced = Person.getInfluenced(params[:person_uri])
+					@influencers = Person.getInfluencersOf(params[:person_uri])
+
+					# FIXME: Do this in the model and return a hash with influenced, 
+					# influencers, and counts.  Better yet, do this all as a JSON
+					# web-service / AJAX call.
+					@forward_count = @influenced.count
+					@backward_count = @influencers.count
+				rescue RestClient::BadRequest
+					redirect_to '/', :notice => "DBPedia doesn't like this request.  :("
+				end
+			else
+				redirect_to '/', :notice => "Currently, you must enter a valid DBPedia URI. Text search coming soon!"
+			end
 		end
 	end
 end
