@@ -7,3 +7,11 @@ CL...: Cluster could not connect to host 2 22202 error 111
 
 --
 
+Lookup / Search for front page:
+
+  http://wiki.dbpedia.org/lookup/
+  https://github.com/dbpedia/lookup/tree/master/src
+  http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?QueryClass=person&QueryString=barack%20obama
+
+  Using queryClass might allow us to winnow down, or maybe we should be running our own semi-local subset of dbpedia data
+  though that restricts us from allowing the user to include arbitrary other data, but maybe that's a bit much anyway.

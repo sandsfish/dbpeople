@@ -3,6 +3,8 @@ include RDF
 class Person
 	endpoint = 'http://dbpedia.org/sparql'
 
+	# TODO:  IMPORTANT: Need to UNION with influencedBy property!
+
 	def self.getInfluenced(personURI, depth=1)
 		# Note: this query excludes other values in DBPedia that define influenced groups by subsetting to the dbpedia:Person class.
 		query = "SELECT * WHERE { <#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced . ?influenced a <http://dbpedia.org/ontology/Person> . }"
