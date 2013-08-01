@@ -15,3 +15,8 @@ Lookup / Search for front page:
 
   Using queryClass might allow us to winnow down, or maybe we should be running our own semi-local subset of dbpedia data
   though that restricts us from allowing the user to include arbitrary other data, but maybe that's a bit much anyway.
+
+Compare results with:
+
+http://live.dbpedia.org/sparql
+http://dbpedia-live.openlinksw.com/sparql
