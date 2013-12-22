@@ -13,6 +13,7 @@ class PeopleController < ApplicationController
 		unless params[:person_uri].nil?
 			if params[:person_uri].starts_with? 'http://dbpedia.org'
 				begin
+				
 					@influenced = Person.getInfluenced(params[:person_uri])
 					@influencers = Person.getInfluencersOf(params[:person_uri])
 
@@ -24,6 +25,7 @@ class PeopleController < ApplicationController
 					# web-service / AJAX call.
 					@forward_count = @influenced.count
 					@backward_count = @influencers.count
+				
 				rescue RestClient::BadRequest
 					puts @influencedJSON
 					redirect_to '/', :notice => "DBPedia doesn't like this request.  :("

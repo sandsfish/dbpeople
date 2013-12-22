@@ -16,12 +16,16 @@ class Person
 	end
 
 	def self.getInfluencersOf(personURI, depth=1)
+		
 		query = "SELECT * WHERE { ?influencer <http://dbpedia.org/ontology/influenced> <#{personURI}> . ?influencer a <http://dbpedia.org/ontology/Person> . }"
+		
 		influencers = queryEndpoint('http://dbpedia.org/sparql', query, "csv")
 		influencers.split("\"").delete_if { |v| v.strip.empty? }[1,influencers.length]
+
 	end
 
 	def self.getInfluencedJSON(personURI, depth=1)
+		
 		# Note: this query excludes other values in DBPedia that define influenced groups by subsetting to the dbpedia:Person class.
 		query = "SELECT ?influenced ?influencedName ?influencedBirth WHERE { 
 					<#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced . 
@@ -29,6 +33,7 @@ class Person
 					?influenced <http://xmlns.com/foaf/0.1/name> ?influencedName . 
 					?influenced <http://dbpedia.org/ontology/birthDate> ?influencedBirth .
 				}"
+		
 		peopleInfluenced = queryEndpoint('http://dbpedia.org/sparql', query, "json")
 
 		# Extract / Transcode JSON result
@@ -38,19 +43,24 @@ class Person
 			puts "#{record['influencedBirth']['value']}"
 		end
 
-
 		puts peopleInfluenced
+		
+		return peopleInfluenced
 	end
 
 	def self.getInfluencersOfJSON(personURI, depth=1)
+		
 		# Note: this query excludes other values in DBPedia that define influenced groups by subsetting to the dbpedia:Person class.
-		query = "SELECT ?influencerName ?influencerBirth WHERE { ?influencer <http://dbpedia.org/ontology/influenced> <#{personURI}> . 
+		query = "SELECT ?influencer ?influencerName ?influencerBirth WHERE { ?influencer <http://dbpedia.org/ontology/influenced> <#{personURI}> . 
 					?influencer a <http://dbpedia.org/ontology/Person> . 
 					?influencer <http://xmlns.com/foaf/0.1/name> ?influencerName . 
 					?influencer <http://dbpedia.org/ontology/birthDate> ?influencerBirth .
 		}"
+		
 		influencers = queryEndpoint('http://dbpedia.org/sparql', query, "json")
+		
 		puts influencers
+		return influencers
 	end
 
 
