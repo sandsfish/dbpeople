@@ -96,7 +96,7 @@
                .attr("transform", function(d, i) {
                    return "translate(" + scale(getBirthYear(d)) + ", " + (svgHeight/2+20) + ")rotate(45)";
                })
-               .duration(1300)
+               .duration(1800)
                .ease();
 
             // // Vertical lines from person nodes
@@ -166,14 +166,14 @@
                .append("circle")
                .attr("fill", "rgb(70, 130, 180")
                .attr("r", "2")
-               .attr("cy", svgHeight/2)
+               .attr("cy", svgHeight/2+0.5)
                .attr("cx", 0)
                .transition()
                .attr("cx", function(d, i) { 
                    // return i * dataSpread + 0.5;
                    return scale(getBirthYear(d));
                })
-               .duration(1300)
+               .duration(1800)
                .ease();
 
             svg.append("circle")
