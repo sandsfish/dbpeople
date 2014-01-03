@@ -1,7 +1,8 @@
 include RDF
 
 class Person
-	endpoint = 'http://dbpedia.org/sparql'
+	# endpoint = 'http://dbpedia.org/sparql'
+	endpoint = 'http://live.dbpedia.org/sparql'
 
 	# TODO:  IMPORTANT: Need to UNION with influencedBy property!
 
