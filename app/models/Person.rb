@@ -5,9 +5,13 @@ class Person
 
 	# TODO:  IMPORTANT: Need to UNION with influencedBy property!
 
+	# FIXME:  DEPRECATED
 	def self.getInfluenced(personURI, depth=1)
 		# Note: this query excludes other values in DBPedia that define influenced groups by subsetting to the dbpedia:Person class.
-		query = "SELECT * WHERE { <#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced . ?influenced a <http://dbpedia.org/ontology/Person> . }"
+		query = "SELECT * WHERE { 
+					<#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced . 
+					?influenced a <http://dbpedia.org/ontology/Person> . }"
+
 		peopleInfluenced = queryEndpoint('http://dbpedia.org/sparql', query, "csv")
 		
 		# Parse CSV into components, remove empty elements due to splitting on quotes (fix this) and 
@@ -15,9 +19,12 @@ class Person
 		peopleInfluenced.split("\"").delete_if { |v| v.strip.empty? }[1,peopleInfluenced.length]
 	end
 
+	# FIXME:  DEPRECATED
 	def self.getInfluencersOf(personURI, depth=1)
 		
-		query = "SELECT * WHERE { ?influencer <http://dbpedia.org/ontology/influenced> <#{personURI}> . ?influencer a <http://dbpedia.org/ontology/Person> . }"
+		query = "SELECT * WHERE { 
+					?influencer <http://dbpedia.org/ontology/influenced> <#{personURI}> . 
+					?influencer a <http://dbpedia.org/ontology/Person> . }"
 		
 		influencers = queryEndpoint('http://dbpedia.org/sparql', query, "csv")
 		influencers.split("\"").delete_if { |v| v.strip.empty? }[1,influencers.length]
@@ -26,21 +33,28 @@ class Person
 
 	def self.getInfluencedJSON(personURI, depth=1)
 		
+		# TODO: Some entities use either birthDate or birthYear property.  Doing a JOIN will get both of these, but duplicates
+		#       for all that have both.  DBpedia does not implement SPARQL 1.1 and so cannot do inner LIMITs on UNIONs.
+		#       The following query will net duplicates, and could be deduplicated post-query.
+		#  { ?influence <http://dbpedia.org/ontology/birthDate> ?influenceBirth } UNION { ?influence <http://dbpedia.org/ontology/birthYear> ?influenceBirth } .
+		#       For now, choose the property most frequently used:
+		#        count(?personA_birthYear):  4,321; count(?personA_birthDate):  13,870
+
 		# Note: this query excludes other values in DBPedia that define influenced groups by subsetting to the dbpedia:Person class.
-		query = "SELECT ?influenced ?influencedName ?influencedBirth WHERE { 
-					<#{personURI}> <http://dbpedia.org/ontology/influenced> ?influenced . 
-					?influenced a <http://dbpedia.org/ontology/Person> . 
-					?influenced <http://xmlns.com/foaf/0.1/name> ?influencedName . 
-					?influenced <http://dbpedia.org/ontology/birthDate> ?influencedBirth .
+		query = "SELECT ?influence ?influenceName ?influenceBirth WHERE { 
+					<#{personURI}> <http://dbpedia.org/ontology/influenced> ?influence . 
+					?influence a <http://dbpedia.org/ontology/Person> . 
+					?influence <http://xmlns.com/foaf/0.1/name> ?influenceName . 
+					?influence <http://dbpedia.org/ontology/birthDate> ?influenceBirth .
 				}"
 		
 		peopleInfluenced = queryEndpoint('http://dbpedia.org/sparql', query, "json")
 
 		# Extract / Transcode JSON result
 		ActiveSupport::JSON.decode(peopleInfluenced)['results']['bindings'].each do |record|
-			puts "#{record['influenced']['value']}"
-			puts "#{record['influencedName']['value']}"
-			puts "#{record['influencedBirth']['value']}"
+			puts "#{record['influence']['value']}"
+			puts "#{record['influenceName']['value']}"
+			puts "#{record['influenceBirth']['value']}"
 		end
 
 		puts peopleInfluenced
@@ -51,10 +65,11 @@ class Person
 	def self.getInfluencersOfJSON(personURI, depth=1)
 		
 		# Note: this query excludes other values in DBPedia that define influenced groups by subsetting to the dbpedia:Person class.
-		query = "SELECT ?influencer ?influencerName ?influencerBirth WHERE { ?influencer <http://dbpedia.org/ontology/influenced> <#{personURI}> . 
-					?influencer a <http://dbpedia.org/ontology/Person> . 
-					?influencer <http://xmlns.com/foaf/0.1/name> ?influencerName . 
-					?influencer <http://dbpedia.org/ontology/birthDate> ?influencerBirth .
+		query = "SELECT ?influence ?influenceName ?influenceBirth WHERE { 
+					?influence <http://dbpedia.org/ontology/influenced> <#{personURI}> . 
+					?influence a <http://dbpedia.org/ontology/Person> . 
+					?influence <http://xmlns.com/foaf/0.1/name> ?influenceName . 
+					?influence <http://dbpedia.org/ontology/birthDate> ?influenceBirth .
 		}"
 		
 		influencers = queryEndpoint('http://dbpedia.org/sparql', query, "json")
