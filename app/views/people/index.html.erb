@@ -8,8 +8,13 @@
   }
 
   path:hover {
-    stroke: rgb(70,130,180); 
+    stroke: rgb(30, 30, 30); 
     stroke-width: 2px;
+  }
+
+  .highlight {
+    stroke-width: 2px;
+    stroke: rgb(70,130,180); 
   }
 </style>
 
@@ -163,11 +168,12 @@
                 .attr("d", function(d, i) {
                   return "M " + focus + " " + svgHeight/2 + " Q 0 0, 0 " + svgHeight/2;
                 })
+                .on("click", highlight)
                 .transition()
                 .attr("d", function(d, i) { 
                   // maybe do a call to a function for this
                   return "M " + focus + " " + svgHeight/2 + 
-                         " Q " + (scale_before(getBirthYear(d))+((Math.random()*100)*-1+40)) + " " + ((Math.random()*-90)+150) + 
+                         " Q " + (scale_before(getBirthYear(d))+((Math.random()*-100)+90)) + " " + ((Math.random()*-10)+150) + 
                          " , " + scale_before(getBirthYear(d)) + " " + svgHeight/2;
                 })
                 .duration(2000)
@@ -183,6 +189,7 @@
                 .attr("d", function(d, i) {
                   return "M " + focus + " " + svgHeight/2 + " Q 0 0, 0 " + svgHeight/2;
                 })
+                .on("click", highlight)
                 .transition()
                 .attr("d", function(d, i) { 
                   // maybe do a call to a function for this
@@ -214,6 +221,11 @@
             // Return just the year of the birth date
             function getBirthYear(d) {
               return dateFormatter(new Date(d.influenceBirth.value));
+            }
+
+            function highlight() {
+              d3.selectAll("path.after").classed("highlight", false);
+              var element = d3.select(this).classed("highlight", true);
             }
 
             // Influenced Nodes
@@ -264,6 +276,7 @@
                .attr("cx", focus)
                .attr("cy", svgHeight/2)
                .attr("fill", primaryColor);
+
 
 
 </script>
