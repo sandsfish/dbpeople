@@ -16,12 +16,15 @@
     stroke-width: 2px;
     stroke: rgb(70,130,180); 
   }
+
+  text {
+    font-weight: bold
+  }
 </style>
 
 <script type="text/javascript" src="assets/d3.v3.js"></script>
 
 <div id="searchbar">
-
   <%= form_tag '/people', :method => :get do %>
 	<%= text_field_tag 'person_uri', nil, :size => 75, :value => params[:person_uri] %>
 	<%= submit_tag 'Analyze Influence', :class => 'button' %>
@@ -33,253 +36,243 @@
 
 <div id="results-container">
   <div id="results">
-
     <div id="d3_timeline"/>
 
-<script type="text/javascript">
+      <script type="text/javascript">
 
-  var influencedJSON = <%= @influencedJSON.html_safe unless @influencedJSON.nil? %>;
-  var influencerJSON = <%= @influencersJSON.html_safe unless @influencersJSON.nil? %>;
+        var influencedJSON = <%= @influencedJSON.html_safe unless @influencedJSON.nil? %>;
+        var influencerJSON = <%= @influencersJSON.html_safe unless @influencersJSON.nil? %>;
 
-            var svgHorizontalPadding = 120;
+        var svgHorizontalPadding = 120;
 
-            // Just year formatting
-            var dateFormatter = d3.time.format("%Y");
+        // Just year formatting
+        var dateFormatter = d3.time.format("%Y");
 
-            // Data Setup
-            var influencedData = influencedJSON.results.bindings;
-            influencedData.sort( function(a,b) { 
-              return d3.ascending(new Date(a.influenceBirth.value), new Date(b.influenceBirth.value));
-            });
+        // Data Setup
+        var influencedData = influencedJSON.results.bindings;
+        influencedData.sort( function(a,b) { 
+          return d3.ascending(new Date(a.influenceBirth.value), new Date(b.influenceBirth.value));
+        });
 
-            var influencerData = influencerJSON.results.bindings;
-            influencerData.sort( function(a,b) { 
-              return d3.ascending(new Date(a.influenceBirth.value), new Date(b.influenceBirth.value));
-            });
+        var influencerData = influencerJSON.results.bindings;
+        influencerData.sort( function(a,b) { 
+          return d3.ascending(new Date(a.influenceBirth.value), new Date(b.influenceBirth.value));
+        });
 
-            // var primaryColor = "#00CCFF"
-            var primaryColor = "rgb(70,130,180)"
+        // Check for empty data sets
+        var doInfluencer = true;
+        if(influencerData.length == 0) {
+          doInfluencer = false;
+        }
 
-            // Main SVG Canvas
-            var svgWidth = 1200;
-            var svgHeight = 500;
-            var focus = svgWidth/2;
-            var dataSpread = svgWidth / influencedJSON.results.bindings.length;
-            var svg = d3.select("#d3_timeline").append("svg");
-            svg.attr("width", svgWidth);
-            svg.attr("height", svgHeight);
-            svg.attr("class", "main_svg");
+        var doInfluenced = true;
+        if(influencedData.length == 0) {
+          doInfluenced = false;
+        }
 
-            // <circle cx="290" cy="500" r="7" fill="rgb(70,130,180)"/>
-            // <circle cx="290" cy="500" r="10" fill="transparent" stroke="rgb(70,130,180)"/>
+        var primaryColor = "rgb(70,130,180)"
 
-            // Horizontal Timeline Bar
-            svg.append("rect")
-               .attr("x", 0)
-               .attr("y", svgHeight/2)
-               .attr("height", 1)
-               .attr("width", svgWidth+100)
-               .attr("fill", "rgb(80, 80, 80)");
+        // Main SVG Canvas
+        var svgWidth = 1200;
+        var svgHeight = 500;
+        var focus = svgWidth/2;
+        var dataSpread = svgWidth / influencedJSON.results.bindings.length;
+        var svg = d3.select("#d3_timeline").append("svg");
+        svg.attr("width", svgWidth);
+        svg.attr("height", svgHeight);
+        svg.attr("class", "main_svg");
 
-            // Birth year time-scale translation and axis
-            var scale_before = d3.scale
-                          .linear()
-                          .domain([ 
-                            d3.min(influencerData, function(d) { return getBirthYear(d) }), 
-                            // dateFormatter(new Date("1711-04-26")),
-                            d3.max(influencerData, function(d) { return getBirthYear(d) }) ])
-                          .range([svgHorizontalPadding, svgWidth/2-svgHorizontalPadding]);
+        // Horizontal Timeline Bar
+        svg.append("rect")
+           .attr("x", svgHorizontalPadding)
+           .attr("y", svgHeight/2)
+           .attr("height", 1)
+           .attr("width", svgWidth-svgHorizontalPadding*2)
+           .attr("fill", "rgb(80, 80, 80)");
 
-            // Birth year time-scale translation and axis
-            var scale_after = d3.scale
-                          .linear()
-                          .domain([ 
-                            d3.min(influencedData, function(d) { return getBirthYear(d) }), 
-                            // dateFormatter(new Date("1711-04-26")),
-                            d3.max(influencedData, function(d) { return getBirthYear(d) }) ])
-                          .range([svgWidth/2+svgHorizontalPadding, svgWidth-svgHorizontalPadding]);
+        // Birth year time-scale translation and axis
+        var scale_before = d3.scale
+                      .linear()
+                      .domain([ 
+                        d3.min(influencerData, function(d) { return getBirthYear(d) }), 
+                        // dateFormatter(new Date("1711-04-26")),
+                        d3.max(influencerData, function(d) { return getBirthYear(d) }) ])
+                      .range([svgHorizontalPadding, svgWidth/2-svgHorizontalPadding]);
 
-            // Influenced Names
-            var names_after = svg.selectAll("text.after")
-               .data(influencedData)
-               .enter()
-               .append("text")
-               .attr("class", "after")
-               .attr("fill", primaryColor)
-               .text( function(d) { 
-                  return d.influenceName.value + " (" + getBirthYear(d) + ")";
-               })
-               .attr("transform", function(d, i) {
-                   return "translate(" + 0 + ", svgHeight/2)rotate(45)";
-               })
-               .transition()
-               .attr("transform", function(d, i) {
-                   return "translate(" + scale_after(getBirthYear(d)) + ", " + (svgHeight/2-5) + ")rotate(-45)";
-               })
-               .duration(1800)
-               .ease();
+        // Birth year time-scale translation and axis
+        var scale_after = d3.scale
+                      .linear()
+                      .domain([ 
+                        d3.min(influencedData, function(d) { return getBirthYear(d) }), 
+                        // dateFormatter(new Date("1711-04-26")),
+                        d3.max(influencedData, function(d) { return getBirthYear(d) }) ])
+                      .range([svgWidth/2+svgHorizontalPadding, svgWidth-svgHorizontalPadding]);
 
-            //Influenced Names
-            var names_before = svg.selectAll("text.before")
-               .data(influencerData)
-               .enter()
-               .append("text")
-               .attr("class", "before")
-               // .attr("fill", primaryColor)
-               .attr("fill", "red")
-               .text( function(d) { 
-                  return d.influenceName.value + " (" + getBirthYear(d) + ")";
-               })
-               .attr("transform", function(d, i) {
-                   return "translate(" + 0 + ", svgHeight/2)rotate(45)";
-               })
-               .transition()
-               .attr("transform", function(d, i) {
-                   return "translate(" + scale_before(getBirthYear(d)) + ", " + (svgHeight/2+20) + ")rotate(45)";
-               })
-               .duration(1800)
-               .ease();
+        // Influenced Names
+        if(doInfluenced) {
+          var names_after = svg.selectAll("text.after")
+           .data(influencedData)
+           .enter()
+           .append("text")
+           .attr("class", "after")
+           .attr("fill", primaryColor)
+           .text( function(d) { 
+              return d.influenceName.value + " (" + getBirthYear(d) + ")";
+           })
+           .attr("transform", function(d, i) {
+               return "translate(" + 0 + ", svgHeight/2)rotate(45)";
+           })
+           .transition()
+           .attr("transform", function(d, i) {
+               return "translate(" + scale_after(getBirthYear(d)) + ", " + (svgHeight/2-5) + ")rotate(-45)";
+           })
+           .duration(1800)
+           .ease();
+        }
 
-            // // Vertical lines from person nodes
-            // var lines = svg.selectAll("rect")
-            //    .data(influenceData)
-            //    .enter()
-            //    .append("rect")
-            //    .attr("y", svgHeight/2)
-            //    .attr("fill", "#AAAAAA")
-            //    .attr("width", "1")
-            //    .attr("height", "30")
-            //    .attr("x", 0)
-            //    .transition()
-            //    .attr("x", function(d, i) { 
-            //        //return i * dataSpread;
-            //        return scale(getBirthYear(d))-0.6;
-            //    })
-            //    .duration(1300)
-            //    .ease();
+        //Influencer Names
+        if(doInfluencer) {
+          var names_before = svg.selectAll("text.before")
+           .data(influencerData)
+           .enter()
+           .append("text")
+           .attr("class", "before")
+           .attr("fill", primaryColor)
+           .text( function(d) { 
+              return d.influenceName.value + " (" + getBirthYear(d) + ")";
+           })
+           .attr("transform", function(d, i) {
+               return "translate(" + 0 + ", svgHeight/2)rotate(45)";
+           })
+           .transition()
+           .attr("transform", function(d, i) {
+               return "translate(" + scale_before(getBirthYear(d)) + ", " + (svgHeight/2+20) + ")rotate(45)";
+           })
+           .duration(1800)
+           .ease();
+        }
 
-            var paths = svg.selectAll("path.before")
-                .data(influencerData)
-                .enter()
-                .append("path")
-                .attr("class", "before")
-                .attr("fill", "transparent")
-                .attr("stroke", "rgb(200, 200, 200)")
-                .attr("d", function(d, i) {
-                  return "M " + focus + " " + svgHeight/2 + " Q 0 0, 0 " + svgHeight/2;
-                })
-                .on("click", highlight)
-                .transition()
-                .attr("d", function(d, i) { 
-                  // maybe do a call to a function for this
-                  return "M " + focus + " " + svgHeight/2 + 
-                         " Q " + (scale_before(getBirthYear(d))+((Math.random()*-100)+90)) + " " + ((Math.random()*-10)+150) + 
-                         " , " + scale_before(getBirthYear(d)) + " " + svgHeight/2;
-                })
-                .duration(2000)
-                .ease();
+        // If there are influencers for this individual, draw arcs from them to the individual node
+        if(doInfluencer) {
+          var paths = svg.selectAll("path.before")
+            .data(influencerData)
+            .enter()
+            .append("path")
+            .attr("class", "before")
+            .attr("fill", "transparent")
+            .attr("stroke", "rgb(200, 200, 200)")
+            .attr("d", function(d, i) {
+              return "M " + focus + " " + svgHeight/2 + " Q 0 0, 0 " + svgHeight/2;
+            })
+            .on("click", highlight)
+            .transition()
+            .attr("d", function(d, i) { 
+              // maybe do a call to a function for this
+              return "M " + focus + " " + svgHeight/2 + 
+                     " Q " + (scale_before(getBirthYear(d))+((Math.random()*-100)+90)) + " " + ((Math.random()*-10)+130) + 
+                     " , " + scale_before(getBirthYear(d)) + " " + svgHeight/2;
+            })
+            .duration(2000)
+            .ease();
+        }
 
-            var paths = svg.selectAll("path.after")
-                .data(influencedData)
-                .enter()
-                .append("path")
-                .attr("class", "after")
-                .attr("fill", "transparent")
-                .attr("stroke", "rgb(200, 200, 200)")
-                .attr("d", function(d, i) {
-                  return "M " + focus + " " + svgHeight/2 + " Q 0 0, 0 " + svgHeight/2;
-                })
-                .on("click", highlight)
-                .transition()
-                .attr("d", function(d, i) { 
-                  // maybe do a call to a function for this
-                  return "M " + focus + " " + svgHeight/2 + 
-                         " Q " + (scale_after(getBirthYear(d))+((Math.random()*-100))) + " " + ((Math.random()*90)+375) + 
-                         " , " + scale_after(getBirthYear(d)) + " " + svgHeight/2;
-                })
-                .duration(2000)
-                .ease();
+        // If there are people influenced by this individual, draw arcs from the individual node to them
+        if(doInfluenced) {
+          var paths = svg.selectAll("path.after")
+            .data(influencedData)
+            .enter()
+            .append("path")
+            .attr("class", "after")
+            .attr("fill", "transparent")
+            .attr("stroke", "rgb(200, 200, 200)")
+            .attr("d", function(d, i) {
+              return "M " + focus + " " + svgHeight/2 + " Q 0 0, 0 " + svgHeight/2;
+            })
+            .on("click", highlight)
+            .transition()
+            .attr("d", function(d, i) { 
+              // maybe do a call to a function for this
+              return "M " + focus + " " + svgHeight/2 + 
+                     " Q " + (scale_after(getBirthYear(d))+((Math.random()*-100))) + " " + ((Math.random()*90)+375) + 
+                     " , " + scale_after(getBirthYear(d)) + " " + svgHeight/2;
+            })
+            .duration(2000)
+            .ease();
+        }
 
-            // Influenced Arcs
-            // var arcs = svg.selectAll("path")
-            //    .data(influenceData)
-            //    .enter()
-            //    .append("path")
-            //    .style("fill", "black")
-            //    .attr("transform", function(d, i) { 
-            //       return "translate(" + scale(getBirthYear(d)) + i*10 + ",100)";
-            //    })
-            //    .attr("d", arc);
+        // Set up year axis (after drawing other elements to avoid overdraw)
+        var axis = d3.svg.axis().scale(scale_after).ticks(influencedData.length).tickFormat(d3.format("1"));
+        svg.append("g")
+           .attr("class", "axis")
+           .attr("transform", "translate(0," + svgHeight + ")")
+           .call(axis);
 
-            // Set up year axis (after drawing other elements to avoid overdraw)
-            var axis = d3.svg.axis().scale(scale_after).ticks(influencedData.length).tickFormat(d3.format("1"));
-            svg.append("g")
-               .attr("class", "axis")
-               .attr("transform", "translate(0," + svgHeight + ")")
-               .call(axis);
+        // Return just the year of the birth date
+        function getBirthYear(d) {
+          return dateFormatter(new Date(d.influenceBirth.value));
+        }
 
-            // Return just the year of the birth date
-            function getBirthYear(d) {
-              return dateFormatter(new Date(d.influenceBirth.value));
-            }
+        // Highlight selected arcs
+        function highlight() {
+          d3.selectAll("path.after").classed("highlight", false);
+          var element = d3.select(this).classed("highlight", true);
+        }
 
-            function highlight() {
-              d3.selectAll("path.after").classed("highlight", false);
-              var element = d3.select(this).classed("highlight", true);
-            }
+        // Influenced Nodes
+        if(doInfluenced) {
+          var circles_after = svg.selectAll("circle.after")
+           .data(influencedData)
+           .enter()
+           .append("circle")
+           .attr("class", "after")
+           // .attr("fill", "rgb(70, 130, 180")
+           .attr("fill", "rgb(80, 80, 80)")
+           .attr("r", "2")
+           .attr("cy", svgHeight/2+0.5)
+           .attr("cx", 0)
+           .transition()
+           .attr("cx", function(d, i) { 
+               // return i * dataSpread + 0.5;
+               return scale_after(getBirthYear(d));
+           })
+           .duration(1800)
+           .ease();
+        }
 
-            // Influenced Nodes
-            var circles_after = svg.selectAll("circle.after")
-               .data(influencedData)
-               .enter()
-               .append("circle")
-               .attr("class", "after")
-               .attr("fill", "rgb(70, 130, 180")
-               .attr("r", "2")
-               .attr("cy", svgHeight/2+0.5)
-               .attr("cx", 0)
-               .transition()
-               .attr("cx", function(d, i) { 
-                   // return i * dataSpread + 0.5;
-                   return scale_after(getBirthYear(d));
-               })
-               .duration(1800)
-               .ease();
+        // Influenced Nodes
+        if(doInfluencer) {
+          var circles_before = svg.selectAll("circle.before")
+           .data(influencerData)
+           .enter()
+           .append("circle")
+           .attr("class", "before")
+           .attr("fill", "rgb(80, 80, 80")
+           .attr("r", "2")
+           .attr("cy", svgHeight/2+0.5)
+           .attr("cx", 0)
+           .transition()
+           .attr("cx", function(d, i) { 
+               // return i * dataSpread + 0.5;
+               return scale_before(getBirthYear(d));
+           })
+           .duration(1800)
+           .ease();
+         }
 
-            // Influenced Nodes
-            var circles_before = svg.selectAll("circle.before")
-               .data(influencerData)
-               .enter()
-               .append("circle")
-               .attr("class", "before")
-               .attr("fill", "rgb(70, 130, 180")
-               .attr("r", "2")
-               .attr("cy", svgHeight/2+0.5)
-               .attr("cx", 0)
-               .transition()
-               .attr("cx", function(d, i) { 
-                   // return i * dataSpread + 0.5;
-                   return scale_before(getBirthYear(d));
-               })
-               .duration(1800)
-               .ease();
+        // Focused Node
+        svg.append("circle")
+           .attr("r", 10)
+           .attr("cx", focus)
+           .attr("cy", svgHeight/2)
+           .attr("stroke", primaryColor)
+           .attr("fill", "transparent");
+        svg.append("circle")
+           .attr("r", 7)
+           .attr("cx", focus)
+           .attr("cy", svgHeight/2)
+           .attr("fill", primaryColor);
 
-            // Focused Node
-            svg.append("circle")
-               .attr("r", 10)
-               .attr("cx", focus)
-               .attr("cy", svgHeight/2)
-               .attr("stroke", primaryColor)
-               .attr("fill", "transparent");
-            svg.append("circle")
-               .attr("r", 7)
-               .attr("cx", focus)
-               .attr("cy", svgHeight/2)
-               .attr("fill", primaryColor);
-
-
-
-</script>
+      </script>
 
     <% unless @influenced.nil? || @influencers.nil? %>
 
