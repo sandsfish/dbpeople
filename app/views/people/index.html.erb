@@ -214,18 +214,18 @@
         }
 
         // Temporary control point viz
-        svg.selectAll("circle.controlpoint")
-           .data(influencerData)
-           .enter()
-           .append("circle")
-           .attr("class", "controlpoint")
-           .attr("fill", "red")
-           .attr("stroke", "rgb(255, 0, 0)")
-           .attr("cx", function(d, i) { return getXControlPointBefore(d); })
-           .attr("cy", function(d, i) { return getYControlPointBefore(d); })
-           .attr("r", 5)
-           .attr("fill-opacity", "0.5")
-           .on("mouseover", function(d, i) { alert(getYControlPointBefore(d)); highlight(d, i); });
+        // svg.selectAll("circle.controlpoint")
+        //    .data(influencerData)
+        //    .enter()
+        //    .append("circle")
+        //    .attr("class", "controlpoint")
+        //    .attr("fill", "red")
+        //    .attr("stroke", "rgb(255, 0, 0)")
+        //    .attr("cx", function(d, i) { return getXControlPointBefore(d); })
+        //    .attr("cy", function(d, i) { return getYControlPointBefore(d); })
+        //    .attr("r", 5)
+        //    .attr("fill-opacity", "0.5")
+        //    .on("mouseover", function(d, i) { alert(getYControlPointBefore(d)); highlight(d, i); });
 
         // If there are people influenced by this individual, draw arcs from the individual node to them
         if(doInfluenced) {
