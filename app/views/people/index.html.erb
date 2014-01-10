@@ -2,7 +2,7 @@
   svg { 
     background-color: white;
     border: 1px solid gray;
-    /*width: 100%;*/
+    display: block;
     margin-left: auto;
     margin-right: auto;
   }
@@ -20,15 +20,23 @@
   text {
     font-weight: bold
   }
+
+  #searchbar {
+    display: inline-block; 
+    margin-left: auto; 
+    margin-right: auto;
+  }
 </style>
 
 <script type="text/javascript" src="assets/d3.v3.js"></script>
-
-<div id="searchbar">
-  <%= form_tag '/people', :method => :get do %>
-	<%= text_field_tag 'person_uri', nil, :size => 75, :value => params[:person_uri] %>
-	<%= submit_tag 'Analyze Influence', :class => 'button' %>
-  <% end %>
+  <div style="width: 100%; text-align: center;">
+  <div id="searchbar">
+    <%= form_tag '/people', :method => :get do %>
+      <%= text_field_tag 'person_uri', nil, :size => 75, :value => params[:person_uri] %>
+      <%= submit_tag 'Analyze Influence', :class => 'button' %>
+    <% end %>
+  </div>
+  </div>
   <% if params[:person_uri].nil? || params[:person_uri].empty? %>
 	<span class="example_text">e.g. <a href="/people?person_uri=http%3A%2F%2Fdbpedia.org%2Fresource%2FNoam_Chomsky">http://dbpedia.org/resource/Noam_Chomsky</a></span>
   <% end %>
@@ -39,6 +47,12 @@
     <div id="d3_timeline"/>
 
       <script type="text/javascript">
+
+        d3.selection.prototype.moveToFront = function() {
+          return this.each(function(){
+            this.parentNode.appendChild(this);
+          });
+        };
 
         var influencedJSON = <%= @influencedJSON.html_safe unless @influencedJSON.nil? %>;
         var influencerJSON = <%= @influencersJSON.html_safe unless @influencersJSON.nil? %>;
@@ -85,7 +99,8 @@
         // Main SVG Canvas
         var svgWidth = 1200;
         var svgHeight = 500;
-        var focus = svgWidth/2;
+        var focusX = svgWidth/2;
+        var focusY = svgHeight/2;
         var dataSpread = svgWidth / influencedJSON.results.bindings.length;
         var svg = d3.select("#d3_timeline").append("svg");
         svg.attr("width", svgWidth);
@@ -95,7 +110,7 @@
         // Horizontal Timeline Bar
         svg.append("rect")
            .attr("x", svgHorizontalPadding)
-           .attr("y", svgHeight/2)
+           .attr("y", focusY)
            .attr("height", 1)
            .attr("width", svgWidth-svgHorizontalPadding*2)
            .attr("fill", "rgb(80, 80, 80)");
@@ -128,11 +143,11 @@
               return d.influenceName.value + " (" + getBirthYear(d) + ")";
            })
            .attr("transform", function(d, i) {
-               return "translate(" + 0 + ", svgHeight/2)rotate(45)";
+               return "translate(" + 0 + ", focusY)rotate(45)";
            })
            .transition()
            .attr("transform", function(d, i) {
-               return "translate(" + scale_after(getBirthYear(d)) + ", " + (svgHeight/2-5) + ")rotate(-45)";
+               return "translate(" + scale_after(getBirthYear(d)) + ", " + (focusY-5) + ")rotate(-45)";
            })
            .duration(1800)
            .ease();
@@ -150,14 +165,28 @@
               return d.influenceName.value + " (" + getBirthYear(d) + ")";
            })
            .attr("transform", function(d, i) {
-               return "translate(" + 0 + ", svgHeight/2)rotate(45)";
+               return "translate(" + 0 + ", focusY)rotate(45)";
            })
            .transition()
            .attr("transform", function(d, i) {
-               return "translate(" + scale_before(getBirthYear(d)) + ", " + (svgHeight/2+20) + ")rotate(45)";
+               return "translate(" + scale_before(getBirthYear(d)) + ", " + (focusY+20) + ")rotate(45)";
            })
            .duration(1800)
            .ease();
+        }
+
+        function getXControlPointBefore(d) {
+          var controlOffset = ((focusX - scale_before(getBirthYear(d)))/2)-20;
+          // TODO: Add Randomness in here
+          // (scale_before(getBirthYear(d))+((Math.random()*-100)+90))
+          return scale_before(getBirthYear(d)) + controlOffset + 60;// + Math.random() * 30;
+        }
+
+        function getYControlPointBefore(d) {
+          var controlOffset = (focusX - scale_before(getBirthYear(d)))/80;
+          // TODO: Add Randomness in here
+          // ((Math.random()*-10)+130)
+          return (300*(1/controlOffset));
         }
 
         // If there are influencers for this individual, draw arcs from them to the individual node
@@ -170,19 +199,33 @@
             .attr("fill", "transparent")
             .attr("stroke", "rgb(200, 200, 200)")
             .attr("d", function(d, i) {
-              return "M " + focus + " " + svgHeight/2 + " Q 0 0, 0 " + svgHeight/2;
+              return "M " + focusX + " " + focusY + " Q 0 0, 0 " + focusY;
             })
-            .on("click", highlight)
+            .on("click", function(d, i) { highlight(d, i); })
             .transition()
             .attr("d", function(d, i) { 
               // maybe do a call to a function for this
-              return "M " + focus + " " + svgHeight/2 + 
-                     " Q " + (scale_before(getBirthYear(d))+((Math.random()*-100)+90)) + " " + ((Math.random()*-10)+130) + 
-                     " , " + scale_before(getBirthYear(d)) + " " + svgHeight/2;
+              return "M " + scale_before(getBirthYear(d)) + " " + focusY + 
+                     " Q " + getXControlPointBefore(d) + " " + getYControlPointBefore(d) + 
+                     " , " + focusX + " " + focusY;
             })
             .duration(2000)
             .ease();
         }
+
+        // Temporary control point viz
+        svg.selectAll("circle.controlpoint")
+           .data(influencerData)
+           .enter()
+           .append("circle")
+           .attr("class", "controlpoint")
+           .attr("fill", "red")
+           .attr("stroke", "rgb(255, 0, 0)")
+           .attr("cx", function(d, i) { return getXControlPointBefore(d); })
+           .attr("cy", function(d, i) { return getYControlPointBefore(d); })
+           .attr("r", 5)
+           .attr("fill-opacity", "0.5")
+           .on("mouseover", function(d, i) { alert(getYControlPointBefore(d)); highlight(d, i); });
 
         // If there are people influenced by this individual, draw arcs from the individual node to them
         if(doInfluenced) {
@@ -194,15 +237,15 @@
             .attr("fill", "transparent")
             .attr("stroke", "rgb(200, 200, 200)")
             .attr("d", function(d, i) {
-              return "M " + focus + " " + svgHeight/2 + " Q 0 0, 0 " + svgHeight/2;
+              return "M " + focusX + " " + focusY + " Q 0 0, 0 " + focusY;
             })
             .on("click", highlight)
             .transition()
             .attr("d", function(d, i) { 
               // maybe do a call to a function for this
-              return "M " + focus + " " + svgHeight/2 + 
+              return "M " + focusX + " " + focusY + 
                      " Q " + (scale_after(getBirthYear(d))+((Math.random()*-100))) + " " + ((Math.random()*90)+375) + 
-                     " , " + scale_after(getBirthYear(d)) + " " + svgHeight/2;
+                     " , " + scale_after(getBirthYear(d)) + " " + focusY;
             })
             .duration(2000)
             .ease();
@@ -221,9 +264,22 @@
         }
 
         // Highlight selected arcs
-        function highlight() {
-          d3.selectAll("path.after").classed("highlight", false);
-          var element = d3.select(this).classed("highlight", true);
+        function highlight(d, i) {
+          
+          // Grab element and class name using index
+          var element = d3.selectAll("path.before")[0][i];
+          var className = d3.select(element).attr("class");
+          
+          // Clear appropriate set of paths based on class name
+          if(className.indexOf("before") != -1) {
+            d3.selectAll("path.before").classed("highlight", false);
+          } else {
+            d3.selectAll("path.after").classed("highlight", false);
+          }
+          
+          // Currently, this causes all the paths inside of this one to not be clickable
+          // Possible Veroni solution?
+          d3.select(element).classed("highlight", true).moveToFront();
         }
 
         // Influenced Nodes
@@ -236,7 +292,7 @@
            // .attr("fill", "rgb(70, 130, 180")
            .attr("fill", "rgb(80, 80, 80)")
            .attr("r", "2")
-           .attr("cy", svgHeight/2+0.5)
+           .attr("cy", focusY+0.5)
            .attr("cx", 0)
            .transition()
            .attr("cx", function(d, i) { 
@@ -256,7 +312,7 @@
            .attr("class", "before")
            .attr("fill", "rgb(80, 80, 80")
            .attr("r", "2")
-           .attr("cy", svgHeight/2+0.5)
+           .attr("cy", focusY+0.5)
            .attr("cx", 0)
            .transition()
            .attr("cx", function(d, i) { 
@@ -270,14 +326,14 @@
         // Focused Node
         svg.append("circle")
            .attr("r", 10)
-           .attr("cx", focus)
-           .attr("cy", svgHeight/2)
+           .attr("cx", focusX)
+           .attr("cy", focusY)
            .attr("stroke", primaryColor)
            .attr("fill", "transparent");
         svg.append("circle")
            .attr("r", 7)
-           .attr("cx", focus)
-           .attr("cy", svgHeight/2)
+           .attr("cx", focusX)
+           .attr("cy", focusY)
            .attr("fill", primaryColor);
 
       </script>
