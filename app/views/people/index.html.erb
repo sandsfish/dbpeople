@@ -1,5 +1,5 @@
 <style>
-  svg { 
+  svg {
     background-color: white;
     border: 1px solid gray;
     display: block;
@@ -8,13 +8,13 @@
   }
 
   path:hover {
-    stroke: rgb(30, 30, 30); 
+    stroke: rgb(30, 30, 30);
     stroke-width: 2px;
   }
 
   .highlight {
     stroke-width: 2px;
-    stroke: rgb(70,130,180); 
+    stroke: rgb(70,130,180);
   }
 
   text {
@@ -22,8 +22,8 @@
   }
 
   #searchbar {
-    display: inline-block; 
-    margin-left: auto; 
+    display: inline-block;
+    margin-left: auto;
     margin-right: auto;
   }
 </style>
@@ -64,12 +64,12 @@
 
         // Data Setup
         var influencedData = influencedJSON.results.bindings;
-        influencedData.sort( function(a,b) { 
+        influencedData.sort( function(a,b) {
           return d3.ascending(new Date(a.influenceBirth.value), new Date(b.influenceBirth.value));
         });
 
         var influencerData = influencerJSON.results.bindings;
-        influencerData.sort( function(a,b) { 
+        influencerData.sort( function(a,b) {
           return d3.ascending(new Date(a.influenceBirth.value), new Date(b.influenceBirth.value));
         });
 
@@ -87,7 +87,7 @@
         // Return unique years from list of individuals' birth years
         function getYears(data) {
           var influenceYears = data.map(function(obj) { return getBirthYear(obj); });
-          return influenceYears.filter(function(v,i) { return influenceYears.indexOf(v) == i; });  
+          return influenceYears.filter(function(v,i) { return influenceYears.indexOf(v) == i; });
         }
 
         // Gather unique influence years to aggregate individuals under
@@ -118,16 +118,16 @@
         // Birth year time-scale translation and axis
         var scale_before = d3.scale
                       .linear()
-                      .domain([ 
-                        d3.min(influencerData, function(d) { return getBirthYear(d) }), 
+                      .domain([
+                        d3.min(influencerData, function(d) { return getBirthYear(d) }),
                         d3.max(influencerData, function(d) { return getBirthYear(d) }) ])
                       .range([svgHorizontalPadding, focusX - svgHorizontalPadding]);
 
         // Birth year time-scale translation and axis
         var scale_after = d3.scale
                       .linear()
-                      .domain([ 
-                        d3.min(influencedData, function(d) { return getBirthYear(d) }), 
+                      .domain([
+                        d3.min(influencedData, function(d) { return getBirthYear(d) }),
                         d3.max(influencedData, function(d) { return getBirthYear(d) }) ])
                       .range([focusX + svgHorizontalPadding, svgWidth - svgHorizontalPadding]);
 
@@ -139,7 +139,7 @@
            .append("text")
            .attr("class", "after")
            .attr("fill", primaryColor)
-           .text( function(d) { 
+           .text( function(d) {
               return d.influenceName.value + " (" + getBirthYear(d) + ")";
            })
            .attr("transform", function(d, i) {
@@ -161,7 +161,7 @@
            .append("text")
            .attr("class", "before")
            .attr("fill", primaryColor)
-           .text( function(d) { 
+           .text( function(d) {
               return d.influenceName.value + " (" + getBirthYear(d) + ")";
            })
            .attr("transform", function(d, i) {
@@ -179,7 +179,6 @@
         function getXControlPointBefore(d) {
           var controlOffset = (focusX - scale_before(getBirthYear(d)))/2;
           // TODO: Add Randomness in here
-          // (scale_before(getBirthYear(d))+((Math.random()*-100)+90))
           return scale_before(getBirthYear(d)) + controlOffset;// + Math.random() * 30;
         }
 
@@ -187,23 +186,18 @@
           var controlOffset = (focusX - scale_before(getBirthYear(d))) / 80;
           // TODO: Add Randomness in here
           // ((Math.random()*-10)+130)
-          //return (300/controlOffset);
-          return 300/controlOffset;
+          return focusY/controlOffset;
         }
 
         // After Control Points
         function getXControlPointAfter(d) {
-          // var controlOffset = ((scale_after(getBirthYear(d))) / 2) - svgHorizontalPadding - 20;
-
           var controlOffset = ((scale_after(getBirthYear(d)) - focusX) / 2);
           return scale_after(getBirthYear(d)) - controlOffset;
         }
 
         function getYControlPointAfter(d) {
           var controlOffset = (scale_after(getBirthYear(d)) - focusX) / 80;
-          //return (controlOffset/0.07) + 100;
-          //return focusY + (300/controlOffset);
-          return focusY + 300/controlOffset;
+          return focusY + (focusY * (1 - (1/controlOffset)));
         }
 
         // If there are influencers for this individual, draw arcs from them to the individual node
@@ -220,10 +214,10 @@
             })
             .on("click", function(d, i) { highlight(d, i); })
             .transition()
-            .attr("d", function(d, i) { 
+            .attr("d", function(d, i) {
               // maybe do a call to a function for this
-              return "M " + scale_before(getBirthYear(d)) + " " + focusY + 
-                     " Q " + getXControlPointBefore(d) + " " + getYControlPointBefore(d) + 
+              return "M " + scale_before(getBirthYear(d)) + " " + focusY +
+                     " Q " + getXControlPointBefore(d) + " " + getYControlPointBefore(d) +
                      " , " + focusX + " " + focusY;
             })
             .duration(2000)
@@ -242,14 +236,14 @@
             .attr("d", function(d, i) {
               return "M " + focusX + " " + focusY + " Q 0 0, 0 " + focusY;
             })
-            .attr("transform", function(d, i) {
-               return "translate(0, 50)"; })
+            // .attr("transform", function(d, i) {
+            //    return "translate(0, 50)"; })
             .on("click", highlight)
             .transition()
-            .attr("d", function(d, i) { 
+            .attr("d", function(d, i) {
               // maybe do a call to a function for this
-              return "M " + focusX + " " + focusY + 
-                     " Q " + getXControlPointAfter(d) + " " + getYControlPointAfter(d) + 
+              return "M " + focusX + " " + focusY +
+                     " Q " + getXControlPointAfter(d) + " " + getYControlPointAfter(d) +
                      " , " + scale_after(getBirthYear(d)) + " " + focusY;
             })
             .duration(2000)
@@ -297,18 +291,18 @@
 
         // Highlight selected arcs
         function highlight(d, i) {
-          
+
           // Grab element and class name using index
           var element = d3.selectAll("path.before")[0][i];
           var className = d3.select(element).attr("class");
-          
+
           // Clear appropriate set of paths based on class name
           if(className.indexOf("before") != -1) {
             d3.selectAll("path.before").classed("highlight", false);
           } else {
             d3.selectAll("path.after").classed("highlight", false);
           }
-          
+
           // Currently, this causes all the paths inside of this one to not be clickable
           // Possible Veroni solution?
           d3.select(element).classed("highlight", true).moveToFront();
@@ -327,7 +321,7 @@
            .attr("cy", focusY+0.5)
            .attr("cx", 0)
            .transition()
-           .attr("cx", function(d, i) { 
+           .attr("cx", function(d, i) {
                // return i * dataSpread + 0.5;
                return scale_after(getBirthYear(d));
            })
@@ -347,7 +341,7 @@
            .attr("cy", focusY+0.5)
            .attr("cx", 0)
            .transition()
-           .attr("cx", function(d, i) { 
+           .attr("cx", function(d, i) {
                // return i * dataSpread + 0.5;
                return scale_before(getBirthYear(d));
            })
