@@ -121,7 +121,7 @@
                       .domain([ 
                         d3.min(influencerData, function(d) { return getBirthYear(d) }), 
                         d3.max(influencerData, function(d) { return getBirthYear(d) }) ])
-                      .range([svgHorizontalPadding, svgWidth/2-svgHorizontalPadding]);
+                      .range([svgHorizontalPadding, focusX - svgHorizontalPadding]);
 
         // Birth year time-scale translation and axis
         var scale_after = d3.scale
@@ -129,7 +129,7 @@
                       .domain([ 
                         d3.min(influencedData, function(d) { return getBirthYear(d) }), 
                         d3.max(influencedData, function(d) { return getBirthYear(d) }) ])
-                      .range([svgWidth/2+svgHorizontalPadding, svgWidth-svgHorizontalPadding]);
+                      .range([focusX + svgHorizontalPadding, svgWidth - svgHorizontalPadding]);
 
         // Influenced Names
         if(doInfluenced) {
@@ -175,23 +175,40 @@
            .ease();
         }
 
+        // Before Control Points
         function getXControlPointBefore(d) {
-          var controlOffset = ((focusX - scale_before(getBirthYear(d)))/2)-20;
+          var controlOffset = (focusX - scale_before(getBirthYear(d)))/2;
           // TODO: Add Randomness in here
           // (scale_before(getBirthYear(d))+((Math.random()*-100)+90))
-          return scale_before(getBirthYear(d)) + controlOffset + 60;// + Math.random() * 30;
+          return scale_before(getBirthYear(d)) + controlOffset;// + Math.random() * 30;
         }
 
         function getYControlPointBefore(d) {
-          var controlOffset = (focusX - scale_before(getBirthYear(d)))/80;
+          var controlOffset = (focusX - scale_before(getBirthYear(d))) / 80;
           // TODO: Add Randomness in here
           // ((Math.random()*-10)+130)
-          return (300*(1/controlOffset));
+          //return (300/controlOffset);
+          return 300/controlOffset;
+        }
+
+        // After Control Points
+        function getXControlPointAfter(d) {
+          // var controlOffset = ((scale_after(getBirthYear(d))) / 2) - svgHorizontalPadding - 20;
+
+          var controlOffset = ((scale_after(getBirthYear(d)) - focusX) / 2);
+          return scale_after(getBirthYear(d)) - controlOffset;
+        }
+
+        function getYControlPointAfter(d) {
+          var controlOffset = (scale_after(getBirthYear(d)) - focusX) / 80;
+          //return (controlOffset/0.07) + 100;
+          //return focusY + (300/controlOffset);
+          return focusY + 300/controlOffset;
         }
 
         // If there are influencers for this individual, draw arcs from them to the individual node
         if(doInfluencer) {
-          var paths = svg.selectAll("path.before")
+          var paths_before = svg.selectAll("path.before")
             .data(influencerData)
             .enter()
             .append("path")
@@ -213,23 +230,9 @@
             .ease();
         }
 
-        // Temporary control point viz
-        // svg.selectAll("circle.controlpoint")
-        //    .data(influencerData)
-        //    .enter()
-        //    .append("circle")
-        //    .attr("class", "controlpoint")
-        //    .attr("fill", "red")
-        //    .attr("stroke", "rgb(255, 0, 0)")
-        //    .attr("cx", function(d, i) { return getXControlPointBefore(d); })
-        //    .attr("cy", function(d, i) { return getYControlPointBefore(d); })
-        //    .attr("r", 5)
-        //    .attr("fill-opacity", "0.5")
-        //    .on("mouseover", function(d, i) { alert(getYControlPointBefore(d)); highlight(d, i); });
-
         // If there are people influenced by this individual, draw arcs from the individual node to them
         if(doInfluenced) {
-          var paths = svg.selectAll("path.after")
+          var paths_after = svg.selectAll("path.after")
             .data(influencedData)
             .enter()
             .append("path")
@@ -239,17 +242,46 @@
             .attr("d", function(d, i) {
               return "M " + focusX + " " + focusY + " Q 0 0, 0 " + focusY;
             })
+            .attr("transform", function(d, i) {
+               return "translate(0, 50)"; })
             .on("click", highlight)
             .transition()
             .attr("d", function(d, i) { 
               // maybe do a call to a function for this
               return "M " + focusX + " " + focusY + 
-                     " Q " + (scale_after(getBirthYear(d))+((Math.random()*-100))) + " " + ((Math.random()*90)+375) + 
+                     " Q " + getXControlPointAfter(d) + " " + getYControlPointAfter(d) + 
                      " , " + scale_after(getBirthYear(d)) + " " + focusY;
             })
             .duration(2000)
             .ease();
         }
+
+        // Temporary control point viz
+        svg.selectAll("circle.controlpoint")
+           .data(influencerData)
+           .enter()
+           .append("circle")
+           .attr("class", "controlpoint")
+           .attr("fill", "red")
+           .attr("stroke", "rgb(255, 0, 0)")
+           .attr("cx", function(d, i) { return getXControlPointBefore(d); })
+           .attr("cy", function(d, i) { return getYControlPointBefore(d); })
+           .attr("r", 5)
+           .attr("fill-opacity", "0.5")
+           .on("mouseover", function(d, i) { alert(getYControlPointBefore(d)); highlight(d, i); });
+
+        svg.selectAll("circle.controlpoint_after")
+           .data(influencedData)
+           .enter()
+           .append("circle")
+           .attr("class", "controlpoint_after")
+           .attr("fill", "red")
+           .attr("stroke", "rgb(255, 0, 0)")
+           .attr("cx", function(d, i) { return getXControlPointAfter(d); })
+           .attr("cy", function(d, i) { return getYControlPointAfter(d); })
+           .attr("r", 5)
+           .attr("fill-opacity", "0.5")
+           .on("mouseover", function(d, i) { alert(scale_after(getBirthYear(d))); highlight(d, i); });
 
         // Set up year axis (after drawing other elements to avoid overdraw)
         var axis = d3.svg.axis().scale(scale_after).ticks(influencedData.length).tickFormat(d3.format("1"));
