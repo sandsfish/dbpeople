@@ -250,12 +250,13 @@
             .ease();
         }
 
+/*
         // Temporary control point viz
-        svg.selectAll("circle.controlpoint")
+        svg.selectAll("circle.controlpoint_before")
            .data(influencerData)
            .enter()
            .append("circle")
-           .attr("class", "controlpoint")
+           .attr("class", "controlpoint_before")
            .attr("fill", "red")
            .attr("stroke", "rgb(255, 0, 0)")
            .attr("cx", function(d, i) { return getXControlPointBefore(d); })
@@ -276,6 +277,7 @@
            .attr("r", 5)
            .attr("fill-opacity", "0.5")
            .on("mouseover", function(d, i) { alert(scale_after(getBirthYear(d))); highlight(d, i); });
+*/
 
         // Set up year axis (after drawing other elements to avoid overdraw)
         var axis = d3.svg.axis().scale(scale_after).ticks(influencedData.length).tickFormat(d3.format("1"));
